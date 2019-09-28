@@ -8,12 +8,13 @@
 - [永久性方案](https://www.cnblogs.com/wangrui-techbolg/archive/2012/12/22/2829614.html)
 
 2. 修改**密码**：`ALTER USER 'root'@'localhost' IDENTIFIED BY ‘密码’;`
-
 3. 数据库的启动：`net start mysql`（也可以通过系统偏好设置-mysql进行启动）
-
 4. 数据库的连接：`mysql -h localhost -u root -p`
-5. 清屏：control + L
-6. 取消执行当前语句：\c
+5. 查看用户名和主机：`select user();`
+6. 查看版本：`select version();`
+7. 清屏：`control + L`
+8. 取消执行当前语句：`\c`
+9. null：比较null只能用 is null / is not null，不能用 =null / !=null
 
 
 
@@ -326,13 +327,13 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
    列就是***变量***，在每一行上，列的值都在变化。Where条件是表达式，在哪一行上表达式为真，哪一行就取出来。where子句针对的对象是磁盘上的***数据表***文件去select的，而select出来后的数据是存放在内存中的一个***临时***"结果集"。
 
    ```
-   例1：🆙【模糊查询 like】——“%”：通配任意字符；“_”：通配单一字符
+   例1. 🆙【模糊查询 like】——“%”：通配任意字符；“_”：通配单一字符
    
    select * from goods where goods_name like '诺基亚%';
    ```
 
    ```
-   例2：查找goods表中本店比市场价格省200以上的商品，差价命名为discount
+   例2. 查找goods表中本店比市场价格省200以上的商品，差价命名为discount
    
    🙆 select goods_id, goods_name, (market_price - shop_price) as discount from goods where (market_price - shop_price) > 200;` 
    
@@ -342,19 +343,19 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
    ```
 
    ```
-   例3：【floor(X)函数：不大于X的最大整数值】有一张表mian和数组(自建)，把num值处于[20,29]之间的改为20，num值处于[30,39]之间的改为30。
+   例3.【floor(X)函数：不大于X的最大整数值】有一张表mian和数组(自建)，把num值处于[20,29]之间的改为20，num值处于[30,39]之间的改为30。
    
    update mian set num = floor(num/10)*10 where num >= 20 and num <= 39;
    ```
 
    ```
-   例4：【substring(str,n)：子字符串】查找诺基亚手机，并去前缀’诺基亚‘
+   例4.【substring(str,n)：子字符串】查找诺基亚手机，并去前缀’诺基亚‘
    
    select goods_id, goods_name, substring(goods_name,4) from goods where goods_name like '诺基亚%';
    ```
 
    ```
-   例5：【concat：结合两字符串】 查找诺基亚手机，并把’诺基亚‘前缀换成‘HTC‘
+   例5.【concat：结合两字符串】 查找诺基亚手机，并把’诺基亚‘前缀换成‘HTC‘
    
    select goods_id, goods_name, concat('HTC', substring(goods_name,4)) from goods where goods_name like '诺基亚%';
    
@@ -363,15 +364,15 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
 
    ---
 
-2. **group 分组查询与统计函数**
+2. **group by 分组查询与统计函数**
 
    ```
-   例6：【max，min，sum，avg】
+   例6.【max，min，sum，avg】
    select max(goods_number) from goods;
    ```
 
    ```
-   例7：【count】
+   例7.【count】
    统计goods表中总商品数(绝对行数)：select count(*)(或count(1)) from goods;
    统计goods_name非null的商品数：select count(goods_name) from goods;
    
@@ -379,7 +380,7 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
    ```
 
    ```
-   例8：【group 配合统计函数】计算goods表中每个栏目下的库存量之和：
+   例8.【group 配合统计函数】计算goods表中每个栏目下的库存量之和：
    select cat_id, sum(goods_number) from goods group by cat_id;
    
    ⚠️ group by a, b ,c 为例，则select的列只能在a, b, c 里选择语义上才没有矛盾。
@@ -392,29 +393,26 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
    having针对的对象是内存表结构中的***"结果集"***。如果同时写了where和having子句，where子句肯定要写在having子句前面，因为having子句是针对where子句查询出来的结果集来操作的。
 
    ```
-   例9：查询本店价比市场价省的钱，且筛选出省钱200以上的商品（例2的having解法）
+   例9. 查询本店价比市场价省的钱，且筛选出省钱200以上的商品（例2的having解法）
    select goods_id, goods_name,(market_price-shop_price) as save from goods having save > 200;
    ```
 
    ```
-   例10：查询每个栏目积压的货款，且筛选出积压货款大于20000的栏目
+   例10. 查询每个栏目积压的货款，且筛选出积压货款大于20000的栏目
    select cat_id, (goods_number * shop_price) as remain from goods group by cat_id having remain > 20000;
    ```
 
    ``` 
-   🌟例11：查询挂科数大于2门的学生的平均成绩
-   解法一：
+   🌟例11. 查询挂科数大于2门的学生的平均成绩
+   
    🙆 select name,sum(score<60) as fail,avg(score) from result group by name having fail>=2;
    🙅 select name,count(score<60) as fail,avg(score) from result group by name having fail>=2;
-   ⚠️ 无论是count(1)还是count(0)都会被统计
    
-   解法二【子查询】：
-   思路：Step1. 找出挂科数>=2的人及其挂科数；Step2. 计算他们的平均分
-   🙆 select name, avg(score) from result where name in (select name from (select name, count(1) as gks from result where score<60 group by name having gks>=2) as tmp) group by name;
+   ⚠️ 无论是count(1)还是count(0)都会被统计
    ```
-
+   
    ---
-
+   
 4. **order by 排序查询**
 
    对结果集进行排序 
@@ -422,12 +420,12 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
    `...order by 列1 asc/desc 列2 asc/desc 列3 asc/desc...	%不写默认asc`
 
    ```
-   例12：按价格由高到低排序
+   例12. 按价格由高到低排序
    select goods_id,goods_name,shop_price from goods order by shop_price desc;
    ```
 
    ```
-   例13：先按栏目由低到高排序,栏目内部再按价格由高到低排序【有冲突时，顺序决定优先】
+   例13. 先按栏目由低到高排序,栏目内部再按价格由高到低排序【有冲突时，顺序决定优先】
    select goods_id,cat_id,goods_name,shop_price from goods order by cat_id asc,shop_price desc;
    ```
 
@@ -438,15 +436,336 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
    `...limit [offset] N	%offset：偏移量；N：取出条目	`
 
    ```
-   例14：查询本店价格最高的前3名
+   例14. 查询本店价格最高的前3名
    select goods_id,goods_name,shop_price from goods order by shop_price desc limit 3;
    ```
 
    ```
-   例15：取出点击量第3名到前5名的商品
+   例15. 取出点击量第3名到前5名的商品
    select goods_id,goods_name,click_count from goods order by click_count desc limit 2,3;
    ```
 
----
+
+
+## 子查询
+
+1. **where型子查询**
+
+   ```
+   例1. 查询最新(goods_id最大)的商品
+   
+   select goods_id,goods_name from goods where goods_id = (select max(goods_id) from goods);
+   ```
+
+   ```
+   例2. 查询每个栏目下goods_id最大的商品
+   
+   select cat_id,goods_id,goods_name from goods where goods_id in (select max(goods_id) from goods group by cat_id);
+   ```
+
+2. **from型子查询**
+
+   内层sql的查询结果，当成一张临时表，供外层sql再次查询。
+
+   ```
+   🌟例3. 查询挂科数大于2门的学生的平均成绩（上一节例13的子查询方法）
+   【where、from型子查询】：
+   思路：Step1. 找出挂科数>=2的人及其挂科数；Step2. 计算他们的平均分
+   
+   🙆 select name, avg(score) from result where name in (select name from (select name, count(1) as gks from result where score<60 group by name having gks>=2) as tmp) group by name;
+   ```
+
+3. **exists型子查询**
+
+   把外层sql的结果，拿到内层sql去测试，如果内层sql成立，则该行取出。
+
+  ```
+  例4. 查出有商品的栏目
+  
+  select * from category where exists (select * from goods where goods.cat_id=category.cat_id);
+  ```
+
+
+
+## 数据联查
+
+1. **全相乘**
+
+   ```
+   例1. 查询商品及其栏目名
+   
+   select goods_id, goods_name, goods.cat_id, category.cat_id, cat_name from goods, category where goods.cat_id = category.cat_id;
+   
+   ⚠️当某一个列名在两个表中都存在时，要注明是哪一个表中的
+   ```
+
+2. **左连接**
+
+   假设A表在左，不动，B表在A表的右边滑动，A表与B表通过一个关系关系来筛选B表的行。
+
+   语法： `A left join B on 条件`
+
+   这一块，形成的也是一个结果集，可以看成一张表，设为C，既如此，可以对C表做查询。
+
+   问：C表可以查询的列有哪些列？	答：A、B的列都可以查
+
+   ```
+   例2. 查询商品及其栏目名(例1的左连接解法)
+   
+   思路：C=[goods left join category on goods.cat_id = category.cat_id]
+   select goods_id,goods_name,cat_name from C；
+   
+   🙆 select goods_id,goods_name,cat_name from goods left join category on goods.cat_id=category.cat_id;
+   ```
+
+   ```
+   例3. 取出第4个栏目下的商品，以其栏目名
+   
+   select goods_id,goods_name,cat_name from goods left join category on goods.cat_id = category.cat_id where goods.cat_id = 4;
+   
+   ⚠️ 此例说明左连接之后还能用where等字句
+   ```
+
+   ```
+   例4.（配对问题）
+   
+   1、所有男生带上配偶上舞台，没配偶的拿牌子写null
+   select boy.*, girl.* from boy left join girl on boy.link = girl.link;
+   
+   2、所有女生带上配偶上舞台，没配偶的拿牌子写null
+   select boy.*, girl.* from girl left join boy on boy.link = girl.link;
+   ```
+
+   ```
+   🌟例5. 已知m表给出了主客场战队id和比赛结果，t表给出了战队id对应的战队名，根据t表补充战队名（两次左连接）
+   
+   select hid,t1.tname,mres,gid,t2.tname,matime from (m left join t as t1 on m.hid = t1.tid) left join t as t2 on m.gid = t2.tid;
+   ```
+
+3. **右连接**
+
+   和左连接一回事，`A left join B on 条件` 等价于 `B right join A on 条件`，一般用左连接。
+
+4. **内连接**
+
+   内连接是左右连接的交集，语法：`A inner join B on 条件`
+
+   ```
+   例6.（配对问题）所有配偶在场的男生女生带上配偶上舞台
+   
+   select boy.*, girl.* from girl inner join boy on boy.link = girl.link;
+   ```
+
+5. **外连接**
+
+   外连接是左右连接的并集，但是mysql中不支持外连接语法(outer join)，可以用其他方式**(union)**替代解决。
+
+   union语法：`A union B`
+
+   问：能否从2张表查询union？——可以，union合并的是“结果集”，不区分来自哪一张表。
+   
+   进一步：取自2张表，可以通过别名让2个结果集的列一致，那么如果取出的结果集列名不一样，还能否union？——可以，以**第一个结果集**中的列名为准。
+
+   再进一步：union什么情况下可以用？——只要结果集的**列数一样**即可（即使列类型不一样）。
+   
+   ```
+   例7. 查出价格低于100元和价格高于4000元的商品（不能用or）
+   
+   select goods_id,goods_name,shop_price from goods where shop_price < 30 union select goods_id,goods_name,shop_price from goods where shop_price > 4000;
+   ```
+   
+   ```
+   例8. 查出第三个栏目下价格前3高和第四个栏目下价格前2高的商品
+   
+   (select goods_id,goods_name,cat_id,shop_price from goods where cat_id = 3 order by shop_price desc limit 3) union (select goods_id,goods_name,cat_id,shop_price from goods where cat_id = 4 order by shop_price desc limit 2);
+   
+   ⚠️ 如果没有limit，内层order by无意义，会被优化掉；有limit时，order by影响结果集，不会被优化掉。
+   ```
+   
+   **union对重复行的处理：**默认回去重。如果不想去重，用**union all**代替union。
+   
+
+
+
+## 数学函数
+
+1. abs
+
+2. bin：二进制；hex：十六进制
+
+3. floor：抹掉零头取整
+
+4. rand：随机生成[0,1]之间的数
+
+   ```
+   例1.随机生成[5,15]之间的数
+   
+   select rand()*10+5;
+   ```
+
+5. group_concat
+
+   ```
+   例2.把cat_id为4的商品id拼接起来
+   
+   select group_concat(goods_id) from goods where cat_id=4;
+   ```
+
+
+
+## 字符串函数
+
+1. ascii
+
+2. length：字节长度；char_length：字符数
+
+3. reverse：反转字符串
+
+4. position(s1 in s)：从字符串 s 中获取 s1 的开始位置	
+
+5. right(s,n)：返回字符串 s 的后 n 个字符
+
+   ```
+   例1. 查询邮箱后缀
+   
+   select *,right(email,length(email)-position('@' in email)) from information;
+   ```
+
+   
+
+##  日期和时间函数
+
+1. now：当前日期时间
+
+2. curdate/current_date：当前日期
+
+3. curtime/current_time：当前时间
+
+4. dayofweek(注意周日是第一天)、dayofmonth、dayofyear
+
+5. week(curdate())：计算今天是今年第几周
+
+   ```
+   例1. 按周计算加班时间
+   
+   Select week(dt) as week_number, sum(overtime) from jiaban group by week_number;
+   ```
+
+
+
+## 控制流函数
+
+```
+例1. 判断性别
+
+select *, case gender when 1 then '男' when 2 then '女' else '妖' end from gender;
+
+⚠️ case 变量 when 某种情况 then 返回值 when 另一种情况 then 返回值 else 默认值 end；
+```
+
+```
+例2. 判断性别，让女士优先
+
+select name, if (gender=2,'优先','等待') as vip from gender;
+
+⚠️ if(exp1,exp2,exp3): 若exp1成立则返回exp2，否则exp3。
+⚠️ ifnull(exp1，exp2): 若exp1非null则返回exp1，否则exp2。
+```
+
+
+
+## 视图
+
+1. 什么是视图？
+
+   view 又称虚拟表，view其实就一条查询SQL语句的结果集==>将常用的SQL查询结果集虚拟为一张表存放在内存中
+
+2. 视图有什么用？
+
+- **权限控制：**某几个列允许用户查询，而其他列不允许，可以通过视图开放其中的一部分列，达到权限的控制
+- **简化查询**
+
+3. 视图语法
+
+- 创建视图
+
+  ```
+  CREATE VIEW view_name AS
+  SELECT column_name(s)
+  FROM table_name
+  WHERE condition;
+  
+  ⚠️ 视图总是显示最新的数据！每当用户查询视图时，数据库引擎通过使用视图的SQL语句重建数据。
+  ```
+
+  ```
+  例1. 小说站1000万篇小说分成article1、...、article5 5张表，每张表存储200万篇小说，创建视图合并所有小说。
+  
+  create view articles as
+  select title from article1 union select title from article2 ... select title from article5; 
+  ```
+
+- 更新视图
+
+  ```
+  CREATE OR REPLACE VIEW view_name AS
+  SELECT column_name(s)
+  FROM table_name
+  WHERE condition;
+  ```
+
+- 修改视图数据
+
+  视图【虚拟表】是物理表的一个"投影"，两者是相互影响的。更改物理表，虚拟表也会更改；同理，更改虚拟表，物理表也会更改！
+
+  视图某种情况下是可以修改的：**物理表和虚拟表的列能一一对应**。
+
+  ⚠️ 视图增删改也会影响表
+
+- 撤销视图
+
+  ```
+  DROP VIEW view_name;
+  ```
+
+
+
+
+## 字符集与乱码问题
+
+1. 字符集
+
+   **GB2312编码**：1981年5月1日发布的简体中文汉字编码国家标准。GB2312对汉字采用**双字节**编码，收录7445个图形字符，其中包括6763个汉字。
+
+   **BIG5编码**：台湾地区繁体中文标准字符集，采用双字节编码，共收录13053个中文字，1984年实施。
+
+   **GBK编码**：1995年12月发布的汉字编码国家标准，是对GB2312编码的扩充，对汉字采用**双字节**编码。GBK字符集共收录21003个汉字，包含国家标准GB13000-1中的全部中日韩汉字，和BIG5编码中的所有汉字。
+
+   **Unicode编码**：国际标准字符集，Unicode包含了全世界所有的字符。Unicode最多可以保存4个字节容量的字符。也就是说，要区分每个字符，每个字符的地址需要4个字节。这是十分浪费存储空间的，于是，程序员就设计了几种字符编码方式，比如：**UTF-8,UTF-16,UTF-32**。
+
+2. 为什么会乱码？
+
+- 原因一：解码时与实际编码不一致（可修复）
+- 原因二：传输过程中，解码不一致，导致字节丢失（不可修复）
+
+3. 怎么能不乱码？
+
+   客户端[GBK]--不转-->连接器[GBK]--转UTF8-->服务器[UTF8]
+
+   客户端[GBK]--转UTF8-->连接器[UTF8]--不转-->服务器[UTF8]
+
+   服务器[UTF8存放数据]-->连接器处理[转换为客户端字符集]-->客户端[GBK显示数据]
+
+   ⚠️声明字符集：正确指定客户端的编码-合理选择连接器的编码-正确指定返回内容的编码
+
+   客户端：`set character_set_client = gbk/utf8;`【谁连接服务器谁就是客户端，客户端字符集是多变的】
+
+   连接器：`set character_set_connection = gbk/utf8;`
+
+   服务器：`set character_set_results= gbk/utf8;`
+
+   三者一致时（三合一）：`set names gbk/utf8;` 
+
+   
 
 参考文章：[最全的MySQL基础](https://www.cnblogs.com/lms520/p/5427685.html)、[燕十八MySQL-秘籍](https://blog.csdn.net/qixibalei/article/details/54340872)、[燕十八mysql复习](https://blog.csdn.net/z10160/article/details/10610637)
