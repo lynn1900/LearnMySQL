@@ -59,7 +59,7 @@
 
 - **查看**建表过程：`show create table 表名;`
 
-- **改表名**：`rename 表名;`
+- **改表名**：`rename table 表名 to 新表名;`
 
 
 
@@ -433,7 +433,7 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
 
 5. **limit 限制条目**
 
-   `...limit [offset] N	%offset：偏移量；N：取出条目	`
+   `...limit [偏移量] N		` or  `...limit N offset 偏移量`
 
    ```
    例14. 查询本店价格最高的前3名
@@ -478,12 +478,12 @@ Intro char(1500) 却浪费的太多了，另一方面，人的简介，一旦注
 3. **exists型子查询**
 
    把外层sql的结果，拿到内层sql去测试，如果内层sql成立，则该行取出。
-
-  ```
-  例4. 查出有商品的栏目
-  
-  select * from category where exists (select * from goods where goods.cat_id=category.cat_id);
-  ```
+   
+   ```
+    例4. 查出有商品的栏目
+     
+   select * from category where exists (select * from goods where goods.cat_id=category.cat_id);
+   ```
 
 
 
